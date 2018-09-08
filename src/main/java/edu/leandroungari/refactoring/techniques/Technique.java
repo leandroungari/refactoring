@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import edu.leandroungari.refactoring.Refactoring;
-import edu.leandroungari.refactoring.git.Commit;
 import edu.leandroungari.refactoring.git.GitRepository;
 
 public abstract class Technique {

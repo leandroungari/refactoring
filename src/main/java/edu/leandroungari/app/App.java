@@ -17,19 +17,7 @@ public class App {
 		
 			GitRepository repo = new GitRepository(url, folder);
 			
-			for (Branch branch: repo.getBranches()) {
-				
-				System.out.println(branch);
-			}
-			
-			Commit m = repo.getCommit("d94ca2b27c9e8a5fa9fe19483d58d2f2ef024606");
-			System.out.println(m);
-			
-			RefDiff ref = new RefDiff();
-			
-			for (Refactoring r: ref.getRefactorings(repo, m.getName())) {
-				System.out.println(r);
-			}
+			System.out.println(repo.getCommits().get(1).getDescription());
 		
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

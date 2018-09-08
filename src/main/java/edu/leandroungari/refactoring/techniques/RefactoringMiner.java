@@ -1,15 +1,18 @@
 package edu.leandroungari.refactoring.techniques;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.refactoringminer.api.GitHistoryRefactoringMiner;
 import org.refactoringminer.api.Refactoring;
 import org.refactoringminer.api.RefactoringHandler;
 import org.refactoringminer.rm1.GitHistoryRefactoringMinerImpl;
 
+import edu.leandroungari.refactoring.RefactoringDescription;
 import edu.leandroungari.refactoring.git.GitRepository;
 
 public class RefactoringMiner extends Technique {
@@ -33,13 +36,22 @@ public class RefactoringMiner extends Technique {
 				@Override
 				public void handle(RevCommit commitData, List<Refactoring> refactorings) {
 
-					// System.out.println("Refactorings at " + commitData.getId().getName());
 					if (commitData.getId().getName().equals(commitId)) {
 
 						for (Refactoring ref : refactorings) {
-
-							result.add(new edu.leandroungari.refactoring.Refactoring(commitId, ref.getName(),
-									ref.toString()));
+							
+							RefactoringDescription r = new RefactoringDescription(ref.getName(), ref.toString());
+							
+							result.add(r);
+						}
+						
+						try {
+							
+							git.getCommit(commitId).setRefactorings(result);
+							
+						} catch (IOException | GitAPIException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
 					}
 				}
@@ -68,17 +80,17 @@ public class RefactoringMiner extends Technique {
 					String commitId = commitData.getId().getName();
 					for (Refactoring ref : refactorings) {
 
-						result.add(
-								new edu.leandroungari.refactoring.Refactoring(
-										commitId, 
-										ref.getName(), 
-										ref.toString()
-								)
-						);
+						result.add(new RefactoringDescription(ref.getName(), ref.toString()));
 					}
 					
 					table.put(commitId, result);
-
+					
+					try {
+						git.getCommit(commitId).setRefactorings(result);
+					} catch (IOException | GitAPIException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			});
 
