@@ -10,14 +10,14 @@ public class RefactoringsFromCommitTest {
 
 	public static void main(String[] args) throws Exception {
 
-		GitRepository rep = new GitRepository("https://github.com/refdiff-data/clojure.git",
+		GitRepository rep = new GitRepository("clojure","https://github.com/refdiff-data/clojure.git",
 				"/home/leandroungari/teste-clojure");
 
 		for (Branch branch : rep.getBranches()) {
 
 			System.out.println("Branch name: " + branch.getName());
 			
-			ArrayList<Commit> commits = rep.getCommits(branch);
+			ArrayList<String> commits = rep.getCommits(branch);
 			
 			/*System.out.println("Number of commits: " + commits.size());
 			for (Commit commit : commits) {

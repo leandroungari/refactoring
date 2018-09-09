@@ -1,11 +1,9 @@
 package edu.leandroungari.refactoring.techniques;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.refactoringminer.api.GitHistoryRefactoringMiner;
 import org.refactoringminer.api.Refactoring;
@@ -44,15 +42,6 @@ public class RefactoringMiner extends Technique {
 							
 							result.add(r);
 						}
-						
-						try {
-							
-							git.getCommit(commitId).setRefactorings(result);
-							
-						} catch (IOException | GitAPIException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
 					}
 				}
 			});
@@ -82,15 +71,7 @@ public class RefactoringMiner extends Technique {
 
 						result.add(new RefactoringDescription(ref.getName(), ref.toString()));
 					}
-					
 					table.put(commitId, result);
-					
-					try {
-						git.getCommit(commitId).setRefactorings(result);
-					} catch (IOException | GitAPIException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
 				}
 			});
 

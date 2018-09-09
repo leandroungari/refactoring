@@ -1,5 +1,9 @@
 package edu.leandroungari.refactoring.git;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -20,12 +24,9 @@ public class Commit implements Jsonable<Commit>, IO{
 	
 	private ArrayList<Refactoring> refactorings;
 	
-	public Commit(String name, String author, Date date, String description) {
+	public Commit(String name) {
 		
 		this.setName(name);
-		this.setAuthor(author);
-		this.setDate(date);
-		this.setDescription(description);
 	}
 
 	public String getName() {
@@ -94,5 +95,32 @@ public class Commit implements Jsonable<Commit>, IO{
 	public Commit fromJSON(String json) throws ParseException {
 		
 		return null;
+	}
+
+	@Override
+	public void write(String filename) throws IOException {
+		
+		FileWriter writer = new FileWriter(new File(filename));
+		
+		writer.write(this.toJSON());
+		writer.close();
+	}
+
+	@Override
+	public void read(String filename) throws ParseException, IOException {
+		
+		File file = new File(filename);
+		FileInputStream fis = new FileInputStream(file);
+		
+		byte[] data = new byte[(int) file.length()];
+		fis.read(data);
+		
+		fis.close();
+		
+		Commit m = this.fromJSON(new String(data, "UTF-8"));
+		this.setName(m.getName());
+		this.setAuthor(m.getAuthor());
+		this.setDate(m.getDate());
+		this.setDescription(m.getDescription());
 	}
 }

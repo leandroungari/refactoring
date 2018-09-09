@@ -1,8 +1,9 @@
 package edu.leandroungari.refactoring.git;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,20 +18,24 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
+import edu.leandroungari.refactoring.Refactoring;
 import refdiff.core.api.GitService;
 import refdiff.core.util.GitServiceImpl;
 
 public class GitRepository {
 
+	private String repositoryName;
+	
 	private String gitClone;
 	private String localFolder;
 
 	private Repository repository;
 	private ArrayList<Branch> branches;
-	private ArrayList<Commit> commits;
+	private ArrayList<String> commits;
 
-	public GitRepository(String gitClone, String localFolder) throws Exception {
+	public GitRepository(String repositoryName, String gitClone, String localFolder) throws Exception {
 
+		this.repositoryName = repositoryName;
 		this.gitClone = gitClone;
 		this.localFolder = localFolder;
 
@@ -65,12 +70,12 @@ public class GitRepository {
 		return this.branches;
 	}
 	
-	public ArrayList<Commit> getCommits() throws MissingObjectException, IncorrectObjectTypeException, IOException, NoHeadException, GitAPIException {
+	public ArrayList<String> getCommits() throws MissingObjectException, IncorrectObjectTypeException, IOException, NoHeadException, GitAPIException {
 		
 		return this.getCommits(new Branch("refs/heads/master"));
 	}
 
-	public ArrayList<Commit> getCommits(Branch branch) throws MissingObjectException, IncorrectObjectTypeException, IOException, NoHeadException, GitAPIException {
+	public ArrayList<String> getCommits(Branch branch) throws MissingObjectException, IncorrectObjectTypeException, IOException, NoHeadException, GitAPIException {
 		
 		if (this.commits.isEmpty()) {
 			
@@ -102,7 +107,7 @@ public class GitRepository {
 
 				if (foundInThisBranch) {
 					
-					this.commits.add(new Commit(commit.getName(), commit.getAuthorIdent().getName(), new Date(commit.getCommitTime() * 1000L), commit.getFullMessage()));
+					this.commits.add(commit.getName());
 				}
 			}
 
@@ -112,25 +117,29 @@ public class GitRepository {
 		
 		return this.commits;
 	}
-	
-	public Commit getCommit(String name) throws MissingObjectException, IncorrectObjectTypeException, NoHeadException, IOException, GitAPIException {
-		
-		return this.getCommit(name, new Branch("refs/heads/master"));
-	}
 
-	public Commit getCommit(String name, Branch branch) throws MissingObjectException, IncorrectObjectTypeException, NoHeadException, IOException, GitAPIException {
-		
-		for (Commit m : this.getCommits(branch)) {
-			if (m.getName().equals(name)) return m;
-		}
-		
-		return null; 
-	}
 
 	public Repository getRepository() {
 		return repository;
 	}
 	
+	
+	public void export(String basepath, HashMap<String, ArrayList<Refactoring>> table) throws MissingObjectException, IncorrectObjectTypeException, NoHeadException, IOException, GitAPIException {
+				
+		String path = basepath + this.repositoryName + "/data/";
+		File baseFolder = new File(path);
+		
+		if (baseFolder.mkdirs()) {
+			
+			for(String m: this.getCommits()) {
+				System.out.println("Generate file: " + path + m + ".json");
+				
+				Commit commit = new Commit(m);
+				commit.setRefactorings(table.get(m));
+				commit.write(path + m + ".json");
+			}
+		}
+	}
 	
 	
 	

@@ -9,7 +9,6 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 
 import edu.leandroungari.refactoring.Refactoring;
 import edu.leandroungari.refactoring.RefactoringTarget;
-import edu.leandroungari.refactoring.git.Commit;
 import edu.leandroungari.refactoring.git.GitRepository;
 import refdiff.core.rm2.model.refactoring.SDRefactoring;
 
@@ -39,16 +38,7 @@ public class RefDiff extends Technique {
 					)
 			);
 		}
-		
-		try {
-		
-			git.getCommit(commitId).setRefactorings(result);
-		
-		} catch (IOException | GitAPIException e) {
 			
-			e.printStackTrace();
-		}
-		
 		return result;
 	}
 
@@ -59,11 +49,9 @@ public class RefDiff extends Technique {
 		
 		try {
 			
-			for(Commit m: git.getCommits()) {
-				
-				ArrayList<Refactoring> r = this.getRefactorings(git, m.getName());
-				table.put(m.getName(), r);
-				m.setRefactorings(r);
+			for(String m: git.getCommits()) {
+				System.out.println("Processing commit: " + m);
+				table.put(m, this.getRefactorings(git, m));
 			}
 			
 		} catch (IOException | GitAPIException e) {
