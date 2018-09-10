@@ -10,13 +10,19 @@ import java.util.Map;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoHeadException;
+import org.eclipse.jgit.errors.CorruptObjectException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.treewalk.filter.PathFilter;
 
 import edu.leandroungari.refactoring.Refactoring;
 import refdiff.core.api.GitService;
@@ -25,7 +31,7 @@ import refdiff.core.util.GitServiceImpl;
 public class GitRepository {
 
 	private String repositoryName;
-	
+
 	private String gitClone;
 	private String localFolder;
 
@@ -43,7 +49,7 @@ public class GitRepository {
 		this.repository = gitService.cloneIfNotExists(this.localFolder, this.gitClone);
 
 		this.commits = new ArrayList<>();
-		
+
 		this.initialize();
 	}
 
@@ -69,78 +75,76 @@ public class GitRepository {
 
 		return this.branches;
 	}
-	
-	public ArrayList<String> getCommits() throws MissingObjectException, IncorrectObjectTypeException, IOException, NoHeadException, GitAPIException {
-		
-		return this.getCommits(new Branch("refs/heads/master"));
-	}
 
-	public ArrayList<String> getCommits(Branch branch) throws MissingObjectException, IncorrectObjectTypeException, IOException, NoHeadException, GitAPIException {
-		
+
+	public ArrayList<String> getCommits() throws IOException {
+
 		if (this.commits.isEmpty()) {
+
+			Ref head = repository.exactRef("refs/heads/master");
+
+			RevWalk revWalk = new RevWalk(repository);
+			RevCommit commit = revWalk.parseCommit(head.getObjectId());			
 			
-			Git git = new Git(repository);
-			RevWalk walk = new RevWalk(repository);
+			revWalk.markStart(commit);
 			
-			Iterable<RevCommit> commits = git.log().all().call();
-		
-			for (RevCommit commit : commits) {
-				
-				boolean foundInThisBranch = false;
-				RevCommit targetCommit = walk.parseCommit(repository.resolve(commit.getName()));
-
-				for (Map.Entry<String, Ref> e : repository.getAllRefs().entrySet()) {
-
-					if (e.getKey().startsWith(Constants.R_HEADS)) {
-
-						if (walk.isMergedInto(targetCommit, walk.parseCommit(e.getValue().getObjectId()))) {
-
-							String foundInBranch = e.getValue().getName();
-
-							if (branch.getName().equals(foundInBranch)) {
-								foundInThisBranch = true;
-								break;
-							}
-						}
-					}
-				}
-
-				if (foundInThisBranch) {
-					
-					this.commits.add(commit.getName());
-				}
+			for (RevCommit rev: revWalk) {
+				this.commits.add(rev.getName());
 			}
-
-			walk.close();
-			git.close();			
+			
+			revWalk.close();
 		}
-		
+
 		return this.commits;
 	}
-
 
 	public Repository getRepository() {
 		return repository;
 	}
-	
-	
-	public void export(String basepath, HashMap<String, ArrayList<Refactoring>> table) throws MissingObjectException, IncorrectObjectTypeException, NoHeadException, IOException, GitAPIException {
-				
+
+	public void export(String basepath, HashMap<String, ArrayList<Refactoring>> table)
+			throws MissingObjectException, IncorrectObjectTypeException, NoHeadException, IOException, GitAPIException {
+
 		String path = basepath + this.repositoryName + "/data/";
 		File baseFolder = new File(path);
-		
+
 		if (baseFolder.mkdirs()) {
-			
-			for(String m: this.getCommits()) {
+
+			for (String m : this.getCommits()) {
 				System.out.println("Generate file: " + path + m + ".json");
-				
+
 				Commit commit = new Commit(m);
 				commit.setRefactorings(table.get(m));
 				commit.write(path + m + ".json");
 			}
 		}
 	}
-	
-	
+
+	public void listFilesPerCommit(String id) throws MissingObjectException, IOException {
+
+		RevWalk revWalk = new RevWalk(repository);
+		ObjectId commitId = ObjectId.fromString(id);
+		
+		RevCommit commit = revWalk.parseCommit(commitId);
+		
+		RevTree tree = commit.getTree();
+		System.out.println("Having tree: " + tree);
+		
+		TreeWalk treeWalk = new TreeWalk(repository);
+		treeWalk.addTree(tree);
+		treeWalk.setRecursive(false);
+		while (treeWalk.next()) {
+		    if (treeWalk.isSubtree()) {
+		        System.out.println("dir: " + treeWalk.getPathString());
+		        treeWalk.enterSubtree();
+		    } else {
+		        System.out.println("file: " + treeWalk.getPathString());
+		    }
+		}
+
+		revWalk.close();
+		treeWalk.close();
+
+	}
 	
 }

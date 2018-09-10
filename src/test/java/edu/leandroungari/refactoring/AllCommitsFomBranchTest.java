@@ -19,7 +19,7 @@ public class AllCommitsFomBranchTest {
         	
         	System.out.println("Branch name: " + branch.getName());
         	
-        	for (String commit: rep.getCommits(branch)) {
+        	for (String commit: rep.getCommits()) {
         		
         		System.out.println(commit);
         	}

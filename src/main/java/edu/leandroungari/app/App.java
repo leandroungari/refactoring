@@ -8,12 +8,13 @@ public class App {
 
 	public static void main(String[] args) {
 		
-		String folder = "/home/leandroungari/junit4";
+		String base = "/home/leandroungari/Documents/Mestrado/";
+		String folder = base + "repositorios/refactoring-toy-example";
 		String url = "https://github.com/junit-team/junit4.git";
 		
 		try {
 		
-			final String PATH = "/home/leandroungari/examples-miner/";
+			final String PATH = base + "dados/examples-miner/";
 			
 			RefactoringMiner miner = new RefactoringMiner();
 			

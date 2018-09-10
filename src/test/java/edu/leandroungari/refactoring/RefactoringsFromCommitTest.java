@@ -17,7 +17,7 @@ public class RefactoringsFromCommitTest {
 
 			System.out.println("Branch name: " + branch.getName());
 			
-			ArrayList<String> commits = rep.getCommits(branch);
+			ArrayList<String> commits = rep.getCommits();
 			
 			/*System.out.println("Number of commits: " + commits.size());
 			for (Commit commit : commits) {
