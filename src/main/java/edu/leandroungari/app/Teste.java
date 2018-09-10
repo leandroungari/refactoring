@@ -13,7 +13,7 @@ public class Teste {
 		try {
 			GitRepository repo = new GitRepository("refactoring-toy-example", url, folder);
 			
-			
+			repo.exportRepositoryTrees(basepath);
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

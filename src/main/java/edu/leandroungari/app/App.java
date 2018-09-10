@@ -19,7 +19,7 @@ public class App {
 			RefactoringMiner miner = new RefactoringMiner();
 			
 			GitRepository repo = new GitRepository("junit4", url, folder);
-			repo.export(PATH, miner.getRefactorings(repo));
+			repo.exportRefactorings(PATH, miner.getRefactorings(repo));
 		
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -36,7 +36,7 @@ public class App {
 			RefDiff refdiff = new RefDiff();
 			
 			GitRepository repo = new GitRepository("junit4", url, folder);
-			repo.export(PATH, refdiff.getRefactorings(repo));
+			repo.exportRefactorings(PATH, refdiff.getRefactorings(repo));
 		
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
