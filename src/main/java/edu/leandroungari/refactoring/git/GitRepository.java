@@ -4,25 +4,18 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoHeadException;
-import org.eclipse.jgit.errors.CorruptObjectException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
-import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
-import org.eclipse.jgit.treewalk.filter.PathFilter;
 
 import edu.leandroungari.refactoring.Refactoring;
 import refdiff.core.api.GitService;
@@ -36,7 +29,6 @@ public class GitRepository {
 	private String localFolder;
 
 	private Repository repository;
-	private ArrayList<Branch> branches;
 	private ArrayList<String> commits;
 
 	public GitRepository(String repositoryName, String gitClone, String localFolder) throws Exception {
@@ -49,31 +41,6 @@ public class GitRepository {
 		this.repository = gitService.cloneIfNotExists(this.localFolder, this.gitClone);
 
 		this.commits = new ArrayList<>();
-
-		this.initialize();
-	}
-
-	private void initialize() throws GitAPIException {
-
-		Git git = new Git(repository);
-		RevWalk walk = new RevWalk(repository);
-
-		List<Ref> branches = git.branchList().call();
-		System.out.println("Number of branches:" + branches.size());
-
-		this.branches = new ArrayList<>();
-		for (Ref branch : branches) {
-
-			this.branches.add(new Branch(branch.getName()));
-		}
-
-		git.close();
-		walk.close();
-	}
-
-	public ArrayList<Branch> getBranches() {
-
-		return this.branches;
 	}
 
 

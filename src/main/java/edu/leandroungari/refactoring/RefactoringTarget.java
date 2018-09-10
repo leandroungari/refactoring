@@ -1,8 +1,6 @@
 package edu.leandroungari.refactoring;
 
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 public class RefactoringTarget extends Refactoring{
 
@@ -48,22 +46,4 @@ public class RefactoringTarget extends Refactoring{
 		
 		return obj.toJSONString();
 	}
-
-	@Override
-	public RefactoringTarget fromJSON(String json) throws ParseException {
-		
-		JSONParser parser = new JSONParser();
-		JSONObject obj = (JSONObject) parser.parse(json);
-		
-		String type = (String) obj.get("type");
-		
-		String initial = (String) obj.get("initial");
-		String target = (String) obj.get("target");
-		
-		return new RefactoringTarget(type, initial, target);
-	}
-	
-	
-	
-	
 }

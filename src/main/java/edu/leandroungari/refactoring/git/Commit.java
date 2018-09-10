@@ -6,8 +6,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import edu.leandroungari.json.IO;
@@ -90,11 +92,32 @@ public class Commit implements Jsonable<Commit>, IO{
 		
 		return obj.toJSONString();
 	}
-
+	
+	@SuppressWarnings("unchecked")
 	@Override
 	public Commit fromJSON(String json) throws ParseException {
 		
-		return null;
+		JSONParser parser = new JSONParser();
+		JSONObject obj = (JSONObject) parser.parse(json);
+		
+		String name = (String) obj.get("name");
+		String author = (String) obj.get("author");
+		Date date = (Date) obj.get("date");
+		String description = (String) obj.get("description");
+		
+		ArrayList<Refactoring> refactorings = new ArrayList<>();
+		Iterator<JSONObject> iterator = ((ArrayList<JSONObject>) obj.get("refactorings")).iterator();
+		
+		while(iterator.hasNext()) {
+			
+			refactorings.add(Refactoring.extract(iterator.next()));
+		}
+		
+		Commit m = new Commit(name);
+		m.setAuthor(author);
+		m.setDate(date);
+		m.setDescription(description);
+		return m;
 	}
 
 	@Override
@@ -102,7 +125,7 @@ public class Commit implements Jsonable<Commit>, IO{
 		
 		FileWriter writer = new FileWriter(new File(filename));
 		
-		writer.write(this.toJSON());
+		writer.write(this.toString());
 		writer.close();
 	}
 

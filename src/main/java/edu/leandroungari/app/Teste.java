@@ -11,9 +11,9 @@ public class Teste {
 		String url = "https://github.com/danilofes/refactoring-toy-example.git";
 
 		try {
-			GitRepository repo = new GitRepository("junit4", url, folder);
+			GitRepository repo = new GitRepository("refactoring-toy-example", url, folder);
 			
-			repo.teste();
+			
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

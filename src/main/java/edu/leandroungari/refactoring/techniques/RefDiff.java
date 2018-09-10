@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.eclipse.jgit.api.errors.GitAPIException;
-
 import edu.leandroungari.refactoring.Refactoring;
 import edu.leandroungari.refactoring.RefactoringTarget;
 import edu.leandroungari.refactoring.git.GitRepository;
@@ -54,7 +52,7 @@ public class RefDiff extends Technique {
 				table.put(m, this.getRefactorings(git, m));
 			}
 			
-		} catch (IOException | GitAPIException e) {
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
