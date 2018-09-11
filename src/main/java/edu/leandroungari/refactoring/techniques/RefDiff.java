@@ -1,5 +1,6 @@
 package edu.leandroungari.refactoring.techniques;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,8 +22,9 @@ public class RefDiff extends Technique {
 	}
 	
 	@Override
-	public ArrayList<Refactoring> getRefactorings(GitRepository git, String commitId) {
+	public ArrayList<Refactoring> getRefactorings(GitRepository git, String commitId, String basepath, String technique) {
 		
+		System.out.println("Processing refactorings from commit: " + commitId);
 		List<SDRefactoring> refactorings = this.refDiff.detectAtCommit(git.getRepository(), commitId);
 
 		ArrayList<Refactoring> result = new ArrayList<>();
@@ -41,23 +43,27 @@ public class RefDiff extends Technique {
 	}
 
 	@Override
-	public HashMap<String, ArrayList<Refactoring>> getRefactorings(GitRepository git) {
+	public void getRefactorings(GitRepository git, String basepath, String technique) {
 		
-		HashMap<String, ArrayList<Refactoring>> table = new HashMap<>();
+		String value = basepath + git.getRepositoryName() + "/refactorings/" + technique + "/";
+		File folder = new File(value);
+		if (folder.mkdirs()) {
 		
-		try {
-			
-			for(String m: git.getCommits()) {
-				System.out.println("Processing commit: " + m);
-				table.put(m, this.getRefactorings(git, m));
+			try {
+				
+				ArrayList<Refactoring> list;
+				for(String m: git.getCommits()) {
+					
+					list = this.getRefactorings(git, m, basepath, technique);
+					Technique.generateCommitFile(value, m, list);
+				}
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
-		
-		return table;
+
 	}
 
 	

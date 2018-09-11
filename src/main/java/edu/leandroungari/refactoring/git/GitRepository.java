@@ -40,6 +40,7 @@ public class GitRepository {
 		this.localFolder = localFolder;
 
 		GitService gitService = new GitServiceImpl();
+		System.out.println("Creating repository: " + this.localFolder);
 		this.repository = gitService.cloneIfNotExists(this.localFolder, this.gitClone);
 
 		this.commits = new ArrayList<>();
@@ -69,24 +70,6 @@ public class GitRepository {
 
 	public Repository getRepository() {
 		return repository;
-	}
-
-	public void exportRefactorings(String basepath, HashMap<String, ArrayList<Refactoring>> table)
-			throws MissingObjectException, IncorrectObjectTypeException, NoHeadException, IOException, GitAPIException {
-
-		String path = basepath + this.repositoryName + "/data/";
-		File baseFolder = new File(path);
-
-		if (baseFolder.mkdirs()) {
-
-			for (String m : this.getCommits()) {
-				System.out.println("Generate file: " + path + m + ".json");
-
-				Commit commit = new Commit(m);
-				commit.setRefactorings(table.get(m));
-				commit.write(path + m + ".json");
-			}
-		}
 	}
 
 	public CommitTreeFile listFilesPerCommit(String id) throws MissingObjectException, IOException {
@@ -141,6 +124,16 @@ public class GitRepository {
 				System.out.println("Generated file: " + path + commitId + ".json");
 			}
 		}
+	}
+
+
+	public String getRepositoryName() {
+		return repositoryName;
+	}
+
+
+	public void setRepositoryName(String repositoryName) {
+		this.repositoryName = repositoryName;
 	}
 		
 	
