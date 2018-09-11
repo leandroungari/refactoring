@@ -13,7 +13,9 @@ public class Teste {
 		try {
 			GitRepository repo = new GitRepository("refactoring-toy-example", url, folder);
 			
-			repo.exportRepositoryTrees(basepath);
+			repo.exportRepositoryTrees(base + "dados/");
+			
+			//repo.listFilesPerCommit("0a46ed5c56c8b1576dfc92f3ec5bc2f0ea68aafe");
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

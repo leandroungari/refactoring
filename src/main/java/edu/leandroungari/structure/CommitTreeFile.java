@@ -18,10 +18,10 @@ public class CommitTreeFile implements Jsonable<CommitTreeFile>, IO{
 	private String commitId;
 	private ArrayList<Register> list;
 	
-	public CommitTreeFile(String id, ArrayList<Register> list) {
+	public CommitTreeFile(String id) {
 		
 		this.commitId = id;
-		this.list = list;
+		this.list = new ArrayList<>();
 	}
 	
 	
@@ -43,7 +43,7 @@ public class CommitTreeFile implements Jsonable<CommitTreeFile>, IO{
 	public void write(String filename) throws IOException {
 		
 		FileWriter writer = new FileWriter(new File(filename));
-		
+	
 		writer.write(this.toString());
 		writer.close();
 	}
@@ -87,7 +87,10 @@ public class CommitTreeFile implements Jsonable<CommitTreeFile>, IO{
 		String commitId = (String) obj.get("commitId");
 		ArrayList<Register> list = (ArrayList<Register>) obj.get("list");
 		
-		return new CommitTreeFile(commitId, list);
+		CommitTreeFile m = new CommitTreeFile(commitId);
+		m.setList(list);
+		
+		return m;
 	}
 	
 	@Override
@@ -96,5 +99,66 @@ public class CommitTreeFile implements Jsonable<CommitTreeFile>, IO{
 		return this.toJSON();
 	}
 	
+	public void addFile(String[] path) {
+		
+		//create add file
+		if (path.length == 1) {
+			this.getList().add(new edu.leandroungari.structure.File(path[0]));
+		}
+		else {
+			
+			Directory dir = null;
+			for (Register r: this.getList()) {
+				if ( (r instanceof Directory) && (r.getValue().equals(path[0])) ) dir = (Directory) r; 
+			}
+			
+			int count = 1;
+			while(count < path.length - 1) {
+				
+				for (Register r: dir.getList()) {
+					if ( (r instanceof Directory) && (r.getValue().equals(path[count])) ) dir = (Directory) r; 
+				}
+				
+				count++;
+			}
+			
+			dir.getList().add(new edu.leandroungari.structure.File(path[count]));
+		}
+	}
 	
+	private Directory containsFolder(ArrayList<Register> list, String s) {
+		
+		for (Register r: list) {
+			if ((r instanceof Directory) && (r.getValue().equals(s))) {
+				return (Directory)r;
+			}
+		}
+		
+		return null;
+	}
+	
+	public void addFolder(String[] folder) {
+		
+		Directory d, atual;
+		
+		atual = this.containsFolder(this.getList(), folder[0]);
+		if (atual == null) {
+			atual = new Directory(folder[0]);
+			this.list.add(atual);
+		}
+		
+		int count = 1;
+		while(count < folder.length) {
+			
+			d = this.containsFolder(atual.getList(), folder[count]);
+			if (d ==  null) {
+				d = new Directory(folder[count]);
+				atual.getList().add(d);
+			}
+			
+			count++;
+			atual = d;
+		}
+		
+	}
 }

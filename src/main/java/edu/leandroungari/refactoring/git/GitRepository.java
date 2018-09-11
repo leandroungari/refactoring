@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.regex.Pattern;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoHeadException;
@@ -19,8 +20,6 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import edu.leandroungari.refactoring.Refactoring;
 import edu.leandroungari.structure.CommitTreeFile;
-import edu.leandroungari.structure.Directory;
-import edu.leandroungari.structure.Register;
 import refdiff.core.api.GitService;
 import refdiff.core.util.GitServiceImpl;
 
@@ -90,7 +89,7 @@ public class GitRepository {
 		}
 	}
 
-	public ArrayList<Register> listFilesPerCommit(String id) throws MissingObjectException, IOException {
+	public CommitTreeFile listFilesPerCommit(String id) throws MissingObjectException, IOException {
 
 		RevWalk revWalk = new RevWalk(repository);
 		ObjectId commitId = ObjectId.fromString(id);
@@ -104,33 +103,46 @@ public class GitRepository {
 		treeWalk.addTree(tree);
 		treeWalk.setRecursive(false);
 		
-		ArrayList<Register> result = new ArrayList<>();
+		//
+		CommitTreeFile m = new CommitTreeFile(id);
 		
 		while (treeWalk.next()) {
+			
+			String value = treeWalk.getPathString();
+			String[] text = value.split(Pattern.quote("/"));
+			System.out.println(value);
 		    if (treeWalk.isSubtree()) {
-		    	result.add(new Directory(treeWalk.getPathString()));
+		    	m.addFolder(text);
 		        treeWalk.enterSubtree();
 		    } else {
-		        result.add(new edu.leandroungari.structure.File(treeWalk.getPathString()));
+		    	
+		        m.addFile(text);
 		    }
 		}
 
 		revWalk.close();
 		treeWalk.close();
 		
-		return result;
+		return m;
 	}
 
 	
 	public void exportRepositoryTrees(String basepath) throws MissingObjectException, IOException {
 		
 		String path = basepath + this.repositoryName + "/trees/";
-		for(String commitId: this.getCommits()) {
-			
-			CommitTreeFile m = new CommitTreeFile(commitId, this.listFilesPerCommit(commitId));
-			m.write(path + commitId + ".json");
-		}
 		
+		File baseFolder = new File(path);
+		if (baseFolder.mkdirs()) {
+			
+			for(String commitId: this.getCommits()) {
+				
+				CommitTreeFile m = this.listFilesPerCommit(commitId);
+				m.write(path + commitId + ".json");
+				System.out.println("Generated file: " + path + commitId + ".json");
+			}
+		}
 	}
+		
+	
 	
 }
